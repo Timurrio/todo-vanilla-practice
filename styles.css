@@ -1,0 +1,140 @@
+:root {
+    --main-red-color: #b83f45;
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: #f5f5f5   ;
+    font: 14px Helvetica Neue,Helvetica,Arial,sans-serif;
+}
+
+
+header {
+    width: 100%;
+    text-align: center;
+    padding: 30px 0;
+}
+
+.header__main-header {
+    color: var(--main-red-color);
+    font-size: 80px;
+    font-weight: 200;
+}
+
+
+main {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+footer {
+    padding: 15px 0;
+    width: 100%;
+    text-align: center;
+}
+
+
+.input-todo {
+    width: auto;
+    height: 50px;
+    font-size: 30px;
+    width: 50%;
+    padding: 25px;
+    border: none;
+    outline: none;
+    /* box-shadow: inset 2px -2px 1px 2px rgba(0,0, 0, 0.2); */
+}
+
+.input-todo:focus {
+    /* box-shadow: inset 5px -2px 1px 5px var(--main-red-color); */
+}
+
+
+.todo-list {
+    width: 50%;
+    background-color: white;
+}
+
+.todo-item {
+  height: 50px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.todo-item.completed .todo-text {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.todo-checkbox {
+  margin-right: 10px;
+}
+
+.todo-text {
+  flex: 1;
+}
+
+.todo-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: transparent;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+
+.todo-item:hover .todo-delete {
+  color: #aaa; 
+}
+
+.todo-item:hover .todo-delete:hover {
+  color: var(--main-red-color);
+}
+
+.todoList-filters {
+    width: 50%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 15px;
+    background-color: white;
+}
+
+.todoList-filter__clear-completed {
+    background: none;
+    border: none;
+}
+
+.todoList-filter__clear-completed:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.filter-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin: 0 5px;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.filter-btn:hover {
+    border: 1px solid var(--main-red-color);
+}
+
+.filter-btn.active {
+  border: 1px solid var(--main-red-color);
+  border-radius: 4px;
+}
