@@ -1,3 +1,92 @@
+function renderInitialLayout() {
+
+  const header = document.createElement("header");
+  header.className = "header";
+
+  const h1 = document.createElement("h1");
+  h1.className = "header__main-header";
+  h1.textContent = "todos";
+
+  header.appendChild(h1);
+
+  const main = document.createElement("main");
+  main.className = "main";
+
+  const form = document.createElement("form");
+  form.id = "todoForm";
+  form.className = "todo-form";
+
+  const label = document.createElement("label");
+  label.id = "toggleAllLabel";
+  label.className = "toggle-all-wrapper";
+
+  const toggleAllInput = document.createElement("input");
+  toggleAllInput.type = "checkbox";
+  toggleAllInput.id = "toggleAll";
+  toggleAllInput.className = "toggle-all";
+
+  const toggleAllSpan = document.createElement("span");
+  toggleAllSpan.className = "toggle-all-checkmark";
+
+  label.append(toggleAllInput, toggleAllSpan);
+
+  const inputTodo = document.createElement("input");
+  inputTodo.id = "inputTodo";
+  inputTodo.className = "input-todo";
+  inputTodo.type = "text";
+  inputTodo.placeholder = "What needs to be done?";
+
+  form.append(label, inputTodo);
+
+  const todoList = document.createElement("ul");
+  todoList.id = "todoList";
+  todoList.className = "todo-list";
+
+  const filtersDiv = document.createElement("div");
+  filtersDiv.className = "todoList-filters";
+
+  const pActiveLeft = document.createElement("p");
+  pActiveLeft.className = "todolist-filters__active-left";
+
+  const tabsDiv = document.createElement("div");
+  tabsDiv.className = "todoList-filter__tabs";
+
+  const btnAll = document.createElement("button");
+  btnAll.dataset.filter = "all";
+  btnAll.className = "filter-btn active";
+  btnAll.textContent = "All";
+
+  const btnActive = document.createElement("button");
+  btnActive.dataset.filter = "active";
+  btnActive.className = "filter-btn";
+  btnActive.textContent = "Active";
+
+  const btnCompleted = document.createElement("button");
+  btnCompleted.dataset.filter = "completed";
+  btnCompleted.className = "filter-btn";
+  btnCompleted.textContent = "Completed";
+
+  tabsDiv.append(btnAll, btnActive, btnCompleted);
+
+  const clearBtn = document.createElement("button");
+  clearBtn.className = "todoList-filter__clear-completed";
+  clearBtn.textContent = "Clear completed";
+
+  filtersDiv.append(pActiveLeft, tabsDiv, clearBtn);
+
+  main.append(form, todoList, filtersDiv);
+
+  const footer = document.createElement("footer");
+  footer.className = "footer";
+  footer.textContent = "Simple footer";
+
+  root.append(header, main, footer);
+}
+
+const root = document.getElementById("root");
+renderInitialLayout();
+
+
 
 const STORAGE_KEY = "todos";
 let todos = [];
@@ -19,9 +108,7 @@ const toggleAll = document.getElementById("toggleAll")
 
 // FUNCTIONS 
 
-function renderInitialLayout() {
-  // INITIAL LAYOUT DETAILS
-}
+
 
 function loadTodos() {
   try {
@@ -167,6 +254,9 @@ function renderTodos() {
 
 
 
+
+
+
 // LISTENERS 
 
 input.addEventListener("keydown", (e) => {
@@ -211,6 +301,5 @@ toggleAll.addEventListener("change", () => {
 
 
 // INIT TODOS
-renderInitialLayout();
 todos = loadTodos();
 renderTodos();
