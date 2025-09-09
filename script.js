@@ -1,23 +1,23 @@
-class Todo {
-  constructor(text, completed = false) {
-    this.id = Date.now().toString();
-    this.text = text;
-    this.completed = completed;
-  }
+// class Todo {
+//   constructor(text, completed = false) {
+//     this.id = Date.now().toString();
+//     this.text = text;
+//     this.completed = completed;
+//   }
 
-  toggle() {
-    this.completed = !this.completed;
-  }
+//   toggle() {
+//     this.completed = !this.completed;
+//   }
 
-  toJSON() {
-    return {
-      id: this.id,
-      text: this.text,
-      completed: this.completed,
-    };
-  }
+//   toJSON() {
+//     return {
+//       id: this.id,
+//       text: this.text,
+//       completed: this.completed,
+//     };
+//   }
 
-}
+// }
 
 
 // Local Storage Logic
