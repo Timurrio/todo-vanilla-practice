@@ -23,6 +23,23 @@
 // Local Storage Logic
 
 const STORAGE_KEY = "todos";
+let todos = [];
+let filteredTodos = [];
+
+const list = document.getElementById("todoList")
+const activeLeft = document.querySelector(".todolist-filters__active-left");
+
+let currentFilter = "all"; 
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
+
+const input = document.getElementById("inputTodo")
+
+const toggleAllLabel = document.getElementById("toggleAllLabel")
+const toggleAll = document.getElementById("toggleAll")
+
+
 
 function loadTodos() {
   try {
@@ -34,17 +51,18 @@ function loadTodos() {
   }
 }
 
+function removeCompleted() {
+    todos = todos.filter( (todo) => todo.completed === false)
+    saveTodos(todos)
+    renderTodos()
+}
+
+
+
 function saveTodos(todos) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
-let todos = loadTodos();
-
-
-// DOM Todo Logic
-
-const list = document.getElementById("todoList")
-const activeLeft = document.querySelector(".todolist-filters__active-left");
 
 function updateActiveCount() {
   const activeCount = todos.filter(todo => !todo.completed).length;
@@ -53,26 +71,21 @@ function updateActiveCount() {
     : `${activeCount} tasks left`;
 }
 
-let currentFilter = "all"; 
+function updateToggleAllVisibility() {
+  if(filteredTodos.length > 0) {
+    toggleAllLabel.style.display = "block"
+  } else {
+    toggleAllLabel.style.display = "none"
+  }
+}
 
-const filterButtons = document.querySelectorAll(".filter-btn");
-
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentFilter = btn.dataset.filter;
-
-    filterButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    renderTodos();
-  });
-});
 
 function renderTodos() {
   list.innerHTML = "";
 
-  let filteredTodos = todos;
-  if (currentFilter === "active") {
+  if(currentFilter === "all") {
+    filteredTodos = todos
+  } else if (currentFilter === "active") {
     filteredTodos = todos.filter(todo => !todo.completed);
   } else if (currentFilter === "completed") {
     filteredTodos = todos.filter(todo => todo.completed);
@@ -123,12 +136,11 @@ function renderTodos() {
     list.appendChild(li);
   });
 
+  updateToggleAllVisibility();
   updateActiveCount();
 }
 
-// TODO INPUT LOGIC
 
-const input = document.getElementById("inputTodo")
 
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && input.value.trim() !== "") {
@@ -145,21 +157,32 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-
-// Clear Completed Button
-
-const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
-
-function removeCompleted() {
-    todos = todos.filter( (todo) => todo.completed === false)
-    saveTodos(todos)
-    renderTodos()
-}
-
 clearCompletedButton.addEventListener("click", () => removeCompleted())
 
+filterButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentFilter = btn.dataset.filter;
 
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    renderTodos();
+  });
+});
+
+toggleAll.addEventListener("change", () => {
+  const markAs = toggleAll.checked;
+  todos.forEach( (todo) => {
+    if(filteredTodos.some(f => f.id === todo.id)){
+      todo.completed = markAs
+    }
+  })
+
+  saveTodos(todos)
+  renderTodos()
+})
 
 
 // INIT TODOS
+todos = loadTodos();
 renderTodos();
