@@ -1,25 +1,3 @@
-// class Todo {
-//   constructor(text, completed = false) {
-//     this.id = Date.now().toString();
-//     this.text = text;
-//     this.completed = completed;
-//   }
-
-//   toggle() {
-//     this.completed = !this.completed;
-//   }
-
-//   toJSON() {
-//     return {
-//       id: this.id,
-//       text: this.text,
-//       completed: this.completed,
-//     };
-//   }
-
-// }
-
-
 
 const STORAGE_KEY = "todos";
 let todos = [];
@@ -40,6 +18,10 @@ const toggleAll = document.getElementById("toggleAll")
 
 
 // FUNCTIONS 
+
+function renderInitialLayout() {
+  // INITIAL LAYOUT DETAILS
+}
 
 function loadTodos() {
   try {
@@ -104,7 +86,7 @@ function createTodoElements() {
     });
 
     const checkmark = document.createElement("span");
-    checkmark.className = "checkmark";
+    checkmark.className = "todo-checkmark";
 
     label.appendChild(checkbox);
     label.appendChild(checkmark);
@@ -130,7 +112,7 @@ function createTodoElements() {
       todoEdit.value = todo.text
 
       btn.style.display = "none"
-      checkbox.style.display = "none"
+      label.style.display = "none"
 
       li.replaceChild(todoEdit, span);
       todoEdit.focus();
@@ -138,7 +120,7 @@ function createTodoElements() {
       todoEdit.addEventListener("blur", () => {
         todo.text = todoEdit.value.trim() || todo.text;
         btn.style.display = "block"
-        checkbox.style.display = "block"
+        label.style.display = "block"
         saveTodos(todos)
         renderTodos()
       })
@@ -175,11 +157,10 @@ function renderTodos() {
   list.innerHTML = "";
 
   filterTodos();
-
   createTodoElements();
 
-  updateToggleAllVisibility();
 
+  updateToggleAllVisibility();
   updateActiveCount();
 }
 
@@ -230,5 +211,6 @@ toggleAll.addEventListener("change", () => {
 
 
 // INIT TODOS
+renderInitialLayout();
 todos = loadTodos();
 renderTodos();
