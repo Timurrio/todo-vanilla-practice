@@ -70,11 +70,11 @@ footer {
 }
 
 .todo-item {
-  height: 50px;
+  height: 60px;
   font-size: 24px;
   display: flex;
   align-items: center;
-  padding: 30px 15px;
+  /* padding: 30px 15px; */
   border-bottom: 1px solid #ddd;
 }
 
@@ -95,9 +95,21 @@ footer {
   flex: 1;
 }
 
+.todo-edit {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  width: 100%;
+  box-shadow: 0 0 5px 2px  var(--main-red-color-transparent); 
+  font-size: 24px;
+  outline: none;
+  border: none;
+  background:none;
+}
+
 .todo-delete {
   background: none;
-  padding: 5px;
+  padding: 10px;
   border: none;
   cursor: pointer;
   color: transparent;
@@ -226,3 +238,4 @@ footer {
 .toggle-all:checked ~ .toggle-all-checkmark::after {
   color: black;
 }
+

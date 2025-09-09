@@ -20,7 +20,6 @@
 // }
 
 
-// Local Storage Logic
 
 const STORAGE_KEY = "todos";
 let todos = [];
@@ -40,11 +39,16 @@ const toggleAllLabel = document.getElementById("toggleAllLabel")
 const toggleAll = document.getElementById("toggleAll")
 
 
+// FUNCTIONS 
 
 function loadTodos() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if(data) {
+      return JSON.parse(data)
+    } else {
+      return []
+    }
   } catch (e) {
     console.error("Error reading todos from localStorage", e);
     return [];
@@ -79,19 +83,8 @@ function updateToggleAllVisibility() {
   }
 }
 
-
-function renderTodos() {
-  list.innerHTML = "";
-
-  if(currentFilter === "all") {
-    filteredTodos = todos
-  } else if (currentFilter === "active") {
-    filteredTodos = todos.filter(todo => !todo.completed);
-  } else if (currentFilter === "completed") {
-    filteredTodos = todos.filter(todo => todo.completed);
-  }
-
-  filteredTodos.forEach(todo => {
+function createTodoElements() {
+   filteredTodos.forEach(todo => {
     const li = document.createElement("li");
     li.dataset.id = todo.id;
     li.className = "todo-item";
@@ -129,18 +122,71 @@ function renderTodos() {
       renderTodos();
     });
 
+  
+    span.addEventListener("dblclick", () => {
+      const todoEdit = document.createElement("input")
+      todoEdit.type = "text"
+      todoEdit.className = "todo-edit"
+      todoEdit.value = todo.text
+
+      btn.style.display = "none"
+      checkbox.style.display = "none"
+
+      li.replaceChild(todoEdit, span);
+      todoEdit.focus();
+
+      todoEdit.addEventListener("blur", () => {
+        todo.text = todoEdit.value.trim() || todo.text;
+        btn.style.display = "block"
+        checkbox.style.display = "block"
+        saveTodos(todos)
+        renderTodos()
+      })
+
+      todoEdit.addEventListener("keydown", (e) => {
+        if(e.key === "Enter") {
+          todoEdit.blur();
+        }
+      })
+
+    })
+
     li.appendChild(label);
     li.appendChild(span);
     li.appendChild(btn);
 
     list.appendChild(li);
   });
+}
+
+function filterTodos() {
+  if(currentFilter === "all") {
+    filteredTodos = todos
+  } else if (currentFilter === "active") {
+    filteredTodos = todos.filter(todo => !todo.completed);
+  } else if (currentFilter === "completed") {
+    filteredTodos = todos.filter(todo => todo.completed);
+  }
+}
+
+// RENDER TODOS 
+
+function renderTodos() {
+  list.innerHTML = "";
+
+  filterTodos();
+
+  createTodoElements();
 
   updateToggleAllVisibility();
+
   updateActiveCount();
 }
 
 
+
+
+// LISTENERS 
 
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && input.value.trim() !== "") {
