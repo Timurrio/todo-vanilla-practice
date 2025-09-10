@@ -113,7 +113,6 @@ function renderInitialLayout() {
   const header = createHeader()
   const main = createMain()
   const footer = createFooter()
-  console.log("renderInitialLayout")
   root.append(header, main, footer);
 }
 
@@ -124,7 +123,6 @@ renderInitialLayout();
 // Query DOM Elements
 
 const STORAGE_KEY = "todos";
-let todos = [];
 let filteredTodos = [];
 
 const list = document.getElementById("todoList")
@@ -166,23 +164,28 @@ function saveTodos(todos) {
 
 function toggleAllTodos(){
   const markAs = toggleAll.checked;
-  todos.forEach( (todo) => {
+
+  const newTodos = loadTodos().map( (todo) => {
     if(filteredTodos.some(f => f.id === todo.id)){
-      todo.completed = markAs
+      return {...todo, completed: markAs}
+    } else {
+      return todo
     }
   })
 
-  saveTodos(todos)
-  renderTodos()
+
+
+  saveTodos(newTodos)
+  renderTodoList()
 }
 
 function changeTodoFilter(btn) {
-  currentFilter = btn.dataset.filter;
+    currentFilter = btn.dataset.filter;
 
     filterButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    renderTodos();
+    renderTodoList();
 }
 
 function addNewTodo(){
@@ -193,21 +196,20 @@ function addNewTodo(){
       completed: false
     };
 
-    todos.push(newTodo);       
-    saveTodos(todos);          
-    renderTodos();             
+    saveTodos([...loadTodos(), newTodo]);
+    renderTodoItem(newTodo)          
     input.value = ""; 
   }
 }
 
 function removeCompletedTodoItems() {
-    todos = todos.filter( (todo) => todo.completed === false)
-    saveTodos(todos)
-    renderTodos()
+    const newTodos = loadTodos().filter( (todo) => todo.completed === false)
+    saveTodos(newTodos)
+    renderTodoList()
 }
 
 function updateActiveTodoCount() {
-  const activeCount = todos.filter(todo => !todo.completed).length;
+  const activeCount = loadTodos().filter(todo => !todo.completed).length;
   activeLeft.textContent = activeCount === 1 
     ? `${activeCount} task left` 
     : `${activeCount} tasks left`;
@@ -221,9 +223,8 @@ function updateToggleAllButtonVisibility() {
   }
 }
 
-function createTodoElements() {
-   filteredTodos.forEach(todo => {
-    const li = document.createElement("li");
+function renderTodoItem(todo){
+  const li = document.createElement("li");
     li.dataset.id = todo.id;
     li.className = "todo-item";
     if (todo.completed) li.classList.add("completed");
@@ -236,9 +237,16 @@ function createTodoElements() {
     checkbox.className = "todo-checkbox";
     checkbox.checked = todo.completed;
     checkbox.addEventListener("change", () => {
-      todo.completed = checkbox.checked;
-      saveTodos(todos);
-      renderTodos();
+
+      const newTodos = loadTodos().map( (td) => {
+        if(td.id === todo.id){
+          return {...td, completed: checkbox.checked}
+        } else {
+          return td
+        }
+      })
+      saveTodos(newTodos);
+      renderTodoList();
     });
 
     const checkmark = document.createElement("span");
@@ -255,9 +263,9 @@ function createTodoElements() {
     btn.className = "todo-delete";
     btn.textContent = "X";
     btn.addEventListener("click", () => {
-      todos = todos.filter(t => t.id !== todo.id);
-      saveTodos(todos);
-      renderTodos();
+      const newTodos = loadTodos().filter(t => t.id !== todo.id);
+      saveTodos(newTodos);
+      renderTodoList();
     });
 
   
@@ -274,11 +282,19 @@ function createTodoElements() {
       todoEdit.focus();
 
       todoEdit.addEventListener("blur", () => {
-        todo.text = todoEdit.value.trim() || todo.text;
+
         btn.style.display = "block"
         label.style.display = "block"
-        saveTodos(todos)
-        renderTodos()
+
+        const newTodos = loadTodos().map( (td) => {
+          if(td.id === todo.id){
+            return {...td, text: todoEdit.value.trim() || todo.text}
+          } else {
+            return td
+          }
+        })
+        saveTodos(newTodos)
+        renderTodoList()
       })
 
       todoEdit.addEventListener("keydown", (e) => {
@@ -294,26 +310,31 @@ function createTodoElements() {
     li.appendChild(btn);
 
     list.appendChild(li);
+}
+
+function renderTodoItems() {
+   filteredTodos.forEach(todo => {
+      renderTodoItem(todo)
   });
 }
 
 function filterTodos() {
   if(currentFilter === "all") {
-    filteredTodos = todos
+    filteredTodos = loadTodos()
   } else if (currentFilter === "active") {
-    filteredTodos = todos.filter(todo => !todo.completed);
+    filteredTodos = loadTodos().filter(todo => !todo.completed);
   } else if (currentFilter === "completed") {
-    filteredTodos = todos.filter(todo => todo.completed);
+    filteredTodos = loadTodos().filter(todo => todo.completed);
   }
 }
 
 // RENDER TODOS 
 
-function renderTodos() {
+function renderTodoList() {
   list.innerHTML = "";
 
   filterTodos();
-  createTodoElements();
+  renderTodoItems();
 
 
   updateToggleAllButtonVisibility();
@@ -341,6 +362,5 @@ toggleAll.addEventListener("change", () => {
   toggleAllTodos()
 })
 
-// INIT TODOS и
-todos = loadTodos();
-renderTodos();
+
+renderTodoList();
