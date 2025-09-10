@@ -1,5 +1,4 @@
-function renderInitialLayout() {
-
+function createHeader() {
   const header = document.createElement("header");
   header.className = "header";
 
@@ -8,10 +7,10 @@ function renderInitialLayout() {
   h1.textContent = "todos";
 
   header.appendChild(h1);
+  return header
+}
 
-  const main = document.createElement("main");
-  main.className = "main";
-
+function createTodoForm(){
   const form = document.createElement("form");
   form.id = "todoForm";
   form.className = "todo-form";
@@ -37,11 +36,18 @@ function renderInitialLayout() {
   inputTodo.placeholder = "What needs to be done?";
 
   form.append(label, inputTodo);
+  return form
+}
 
+function createTodoList(){
   const todoList = document.createElement("ul");
   todoList.id = "todoList";
   todoList.className = "todo-list";
 
+  return todoList
+}
+
+function createTodoListFooter(){
   const filtersDiv = document.createElement("div");
   filtersDiv.className = "todoList-filters";
 
@@ -74,12 +80,37 @@ function renderInitialLayout() {
 
   filtersDiv.append(pActiveLeft, tabsDiv, clearBtn);
 
-  main.append(form, todoList, filtersDiv);
+  return filtersDiv
+}
 
+function createMain(){
+  const main = document.createElement("main");
+  main.className = "main";
+
+  const form = createTodoForm()
+  const todoList = createTodoList()
+  const todoListFooter = createTodoListFooter()
+
+  main.append(form, todoList, todoListFooter);
+
+
+  return main
+}
+
+function createFooter(){
   const footer = document.createElement("footer");
   footer.className = "footer";
   footer.textContent = "Simple footer";
 
+  return footer
+}
+
+function renderInitialLayout() {
+
+  const header = createHeader()
+  const main = createMain()
+  const footer = createFooter()
+  console.log("renderInitialLayout")
   root.append(header, main, footer);
 }
 
@@ -87,6 +118,7 @@ const root = document.getElementById("root");
 renderInitialLayout();
 
 
+// Query DOM Elements
 
 const STORAGE_KEY = "todos";
 let todos = [];
@@ -101,6 +133,7 @@ const filterButtons = document.querySelectorAll(".filter-btn");
 const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
 
 const input = document.getElementById("inputTodo")
+const todoForm = document.getElementById("todoForm")
 
 const toggleAllLabel = document.getElementById("toggleAllLabel")
 const toggleAll = document.getElementById("toggleAll")
@@ -259,8 +292,24 @@ function renderTodos() {
 
 // LISTENERS 
 
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && input.value.trim() !== "") {
+// input.addEventListener("keydown", (e) => {
+//   if (e.key === "Enter" && input.value.trim() !== "") {
+//     const newTodo = {
+//       id: Date.now().toString(), 
+//       text: input.value.trim(),
+//       completed: false
+//     };
+
+//     todos.push(newTodo);       
+//     saveTodos(todos);          
+//     renderTodos();             
+//     input.value = "";          
+//   }
+// });
+
+todoForm.addEventListener("submit", (e) => {
+  e.preventDefault()
+  if(input.value.trim() !== "") {
     const newTodo = {
       id: Date.now().toString(), 
       text: input.value.trim(),
@@ -270,9 +319,9 @@ input.addEventListener("keydown", (e) => {
     todos.push(newTodo);       
     saveTodos(todos);          
     renderTodos();             
-    input.value = "";          
+    input.value = ""; 
   }
-});
+})
 
 clearCompletedButton.addEventListener("click", () => removeCompleted())
 
