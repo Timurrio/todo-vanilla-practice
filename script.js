@@ -200,20 +200,20 @@ function addNewTodo(){
   }
 }
 
-function removeCompleted() {
+function removeCompletedTodoItems() {
     todos = todos.filter( (todo) => todo.completed === false)
     saveTodos(todos)
     renderTodos()
 }
 
-function updateActiveCount() {
+function updateActiveTodoCount() {
   const activeCount = todos.filter(todo => !todo.completed).length;
   activeLeft.textContent = activeCount === 1 
     ? `${activeCount} task left` 
     : `${activeCount} tasks left`;
 }
 
-function updateToggleAllVisibility() {
+function updateToggleAllButtonVisibility() {
   if(filteredTodos.length > 0) {
     toggleAllLabel.style.display = "block"
   } else {
@@ -316,8 +316,8 @@ function renderTodos() {
   createTodoElements();
 
 
-  updateToggleAllVisibility();
-  updateActiveCount();
+  updateToggleAllButtonVisibility();
+  updateActiveTodoCount();
 }
 
 
@@ -329,7 +329,7 @@ todoForm.addEventListener("submit", (e) => {
   addNewTodo()
 })
 
-clearCompletedButton.addEventListener("click", () => removeCompleted())
+clearCompletedButton.addEventListener("click", () => removeCompletedTodoItems())
 
 filterButtons.forEach(btn => {
   btn.addEventListener("click", () => {
