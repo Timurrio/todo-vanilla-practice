@@ -105,6 +105,9 @@ function createFooter(){
   return footer
 }
 
+
+// RENDER INITIAL LAYOUT
+
 function renderInitialLayout() {
 
   const header = createHeader()
@@ -157,18 +160,51 @@ function loadTodos() {
   }
 }
 
+function saveTodos(todos) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+}
+
+function toggleAllTodos(){
+  const markAs = toggleAll.checked;
+  todos.forEach( (todo) => {
+    if(filteredTodos.some(f => f.id === todo.id)){
+      todo.completed = markAs
+    }
+  })
+
+  saveTodos(todos)
+  renderTodos()
+}
+
+function changeTodoFilter(btn) {
+  currentFilter = btn.dataset.filter;
+
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    renderTodos();
+}
+
+function addNewTodo(){
+   if(input.value.trim() !== "") {
+    const newTodo = {
+      id: Date.now().toString(), 
+      text: input.value.trim(),
+      completed: false
+    };
+
+    todos.push(newTodo);       
+    saveTodos(todos);          
+    renderTodos();             
+    input.value = ""; 
+  }
+}
+
 function removeCompleted() {
     todos = todos.filter( (todo) => todo.completed === false)
     saveTodos(todos)
     renderTodos()
 }
-
-
-
-function saveTodos(todos) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-}
-
 
 function updateActiveCount() {
   const activeCount = todos.filter(todo => !todo.completed).length;
@@ -285,70 +321,26 @@ function renderTodos() {
 }
 
 
-
-
-
-
-
 // LISTENERS 
 
-// input.addEventListener("keydown", (e) => {
-//   if (e.key === "Enter" && input.value.trim() !== "") {
-//     const newTodo = {
-//       id: Date.now().toString(), 
-//       text: input.value.trim(),
-//       completed: false
-//     };
-
-//     todos.push(newTodo);       
-//     saveTodos(todos);          
-//     renderTodos();             
-//     input.value = "";          
-//   }
-// });
 
 todoForm.addEventListener("submit", (e) => {
   e.preventDefault()
-  if(input.value.trim() !== "") {
-    const newTodo = {
-      id: Date.now().toString(), 
-      text: input.value.trim(),
-      completed: false
-    };
-
-    todos.push(newTodo);       
-    saveTodos(todos);          
-    renderTodos();             
-    input.value = ""; 
-  }
+  addNewTodo()
 })
 
 clearCompletedButton.addEventListener("click", () => removeCompleted())
 
 filterButtons.forEach(btn => {
   btn.addEventListener("click", () => {
-    currentFilter = btn.dataset.filter;
-
-    filterButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    renderTodos();
+    changeTodoFilter(btn)
   });
 });
 
 toggleAll.addEventListener("change", () => {
-  const markAs = toggleAll.checked;
-  todos.forEach( (todo) => {
-    if(filteredTodos.some(f => f.id === todo.id)){
-      todo.completed = markAs
-    }
-  })
-
-  saveTodos(todos)
-  renderTodos()
+  toggleAllTodos()
 })
 
-
-// INIT TODOS
+// INIT TODOS и
 todos = loadTodos();
 renderTodos();
