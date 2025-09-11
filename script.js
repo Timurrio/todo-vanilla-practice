@@ -52,7 +52,7 @@ function createTodoListFooter(){
   filtersDiv.className = "todoList-filters";
 
   const activeTodosAmount = document.createElement("p");
-  activeTodosAmount.className = "todolist-filters__active-left";
+  activeTodosAmount.className = "todolist-filters__active-amount";
 
   const tabsDiv = document.createElement("div");
   tabsDiv.className = "todoList-filter__tabs";
@@ -126,7 +126,7 @@ const STORAGE_KEY = "todos";
 let filteredTodos = [];
 
 const list = document.getElementById("todoList")
-const activeLeft = document.querySelector(".todolist-filters__active-left");
+const activeTodosAmount = document.querySelector(".todolist-filters__active-amount");
 
 let currentFilter = "all"; 
 const filterButtons = document.querySelectorAll(".filter-btn");
@@ -195,7 +195,7 @@ function addNewTodo(e){
 
 
     saveTodos([...loadTodos(), newTodo]);
-    renderTodoItem(newTodo)    
+    createTodoItem(newTodo)    
     renderTodoList()      
     input.value = ""; 
   }
@@ -209,7 +209,7 @@ function removeCompletedTodoItems() {
 
 function updateActiveTodoCount(todos) {
   const activeCount = todos.filter(todo => !todo.completed).length;
-  activeLeft.textContent = activeCount === 1 
+  activeTodosAmount.textContent = activeCount === 1 
     ? `${activeCount} task left` 
     : `${activeCount} tasks left`;
 }
@@ -240,9 +240,9 @@ function removeTodo(todo) {
       renderTodoList();
     }
 
-function renderTodoItem(todo){
+function createTodoItem(todo){
 
-  const li = document.createElement("li");
+    const li = document.createElement("li");
     li.dataset.id = todo.id;
     li.className = "todo-item";
     if (todo.completed) li.classList.add("completed");
@@ -316,9 +316,9 @@ function renderTodoItem(todo){
     list.appendChild(li);
 }
 
-function renderTodoItems() {
+function createTodoItems() {
    filteredTodos.forEach(todo => {
-      renderTodoItem(todo)
+      createTodoItem(todo)
   });
 }
 
@@ -357,7 +357,7 @@ function renderTodoList() {
   console.log("RENDER")
 
   filterTodos(todos);
-  renderTodoItems();
+  createTodoItems();
 
 
   updateToggleAllButtonVisibility();
@@ -370,11 +370,11 @@ function renderTodoList() {
 
 todoForm.addEventListener("submit", (e) =>  addNewTodo(e) )
 
-clearCompletedButton.addEventListener("click", () => removeCompletedTodoItems())
+clearCompletedButton.addEventListener("click", removeCompletedTodoItems)
 
 filterButtons.forEach(btn => btn.addEventListener("click", () => changeTodoFilter(btn)));
 
-toggleAll.addEventListener("change", () => toggleAllTodos())
+toggleAll.addEventListener("change", toggleAllTodos)
 
 
 renderTodoList();

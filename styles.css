@@ -279,3 +279,6 @@ footer {
   color: black;
 }
 
+.todolist-filters__active-amount {
+  color: black;
+}
