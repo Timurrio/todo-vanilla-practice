@@ -10,35 +10,6 @@ function createHeader() {
   return header
 }
 
-// function createTodoForm(){
-//   const form = document.createElement("form");
-//   form.id = "todoForm";
-//   form.className = "todo-form";
-
-//   const label = document.createElement("label");
-//   label.id = "toggleAllLabel";
-//   label.className = "toggle-all-wrapper";
-
-//   const toggleAllInput = document.createElement("input");
-//   toggleAllInput.type = "checkbox";
-//   toggleAllInput.id = "toggleAll";
-//   toggleAllInput.className = "toggle-all";
-
-//   const toggleAllSpan = document.createElement("span");
-//   toggleAllSpan.className = "toggle-all-checkmark";
-
-//   label.append(toggleAllInput, toggleAllSpan);
-
-//   const inputTodo = document.createElement("input");
-//   inputTodo.id = "inputTodo";
-//   inputTodo.className = "input-todo";
-//   inputTodo.type = "text";
-//   inputTodo.placeholder = "What needs to be done?";
-
-//   form.append(label, inputTodo);
-//   return form
-// }
-
 function createTodoList(){
   const todoList = document.createElement("ul");
   todoList.id = "todoList";
@@ -87,7 +58,6 @@ function createMain(form){
   const main = document.createElement("main");
   main.className = "main";
 
-//   const form = createTodoForm()
   const todoList = createTodoList()
   const todoListFooter = createTodoListFooter()
 
@@ -131,7 +101,7 @@ class Form {
         const formElements = this.createFormElements()
         this.form = formElements.formElement
         this.input = formElements.inputElement
-        this.toggleAll = formElements.toggleAll
+        this.toggleAll = formElements.toggleAllElement
     }
 
     createFormElements(){
@@ -176,31 +146,51 @@ class App {
 
     }
 
+    handleTodoFormSubmit(e){
+        e.preventDefault()
+        this.todoList.addTodo(this.todoForm.input.value.trim())
+        this.todoForm.input.value = ""
+    }
+
+    handleChangeTodoFilter(btn){
+        this.todoList.currentFilter = btn.dataset.filter;
+
+        filterButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        this.todoList.render()
+    }
+
+    handleClearCompletedTodos(){
+        this.todoList.todos = this.todoList.todos.filter( (todo) => todo.completed === false)
+    }
+
     init(){
         renderInitialLayout(this.root, this.todoForm.form)
         
-        this.todoForm.form.addEventListener("submit", (e) => {
-            e.preventDefault()
-            this.todoList.addTodo(this.todoForm.input.value.trim())
-            this.todoForm.input.value = ""
-        })
+        this.todoForm.form.addEventListener("submit", (e) => this.handleTodoFormSubmit(e))
 
         this.todoList.root = document.getElementById("todoList")
         this.todoList.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
 
         this.todoList.toggleAllLabel = document.getElementById("toggleAllLabel")
         this.todoList.toggleAll = document.getElementById("toggleAll")
-        console.log(this.todoList.toggleAll.checked)
         this.todoList.toggleAll.addEventListener("change", this.todoList.toggleAllTodos.bind(this.todoList))
 
+
+
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        filterButtons.forEach(btn => btn.addEventListener("click", (btn) => this.handleChangeTodoFilter(btn)));
+
+        const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
+
+        clearCompletedButton.addEventListener("click", this.handleClearCompletedTodos)
+
+
         this.todoList.render()
-
     }
 
-    render(){
-        //RENDER DOM
 
-    }
 }
 
 class TodoService {
@@ -208,7 +198,6 @@ class TodoService {
         try {
             const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
             const todos = data.map((todo) => new TodoItem(todo.id, todo.text, todo.completed, todoList))
-            console.log(todos)
             return todos
         } catch (e) {
             console.error("Error reading todos from localStorage", e);
@@ -219,7 +208,6 @@ class TodoService {
 
     static setTodos(todos) {
         const data = todos.map((todo) => ({id: todo.id, text: todo.text, completed: todo.completed}))
-        console.log(todos)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
@@ -237,15 +225,6 @@ class TodoItem {
     toggle(){
         this.completed = !this.completed
         this.todoList.updateTodo(this)
-        // const newTodos = getTodos().map( (td) => {
-        // if(td.id === this.id){
-        //   return this
-        // } else {
-        //   return td
-        // }
-        // })
-        // setTodos(newTodos);
-        // renderTodoList();
         
     }
 
@@ -367,14 +346,12 @@ class TodoList {
     updateActiveTodoCount() {
         
         const activeCount = this.todos.filter(todo => !todo.completed).length;
-        console.log(this.activeTodoAmount)
         this.activeTodoAmount.textContent = activeCount === 1 
             ? `${activeCount} task left` 
             : `${activeCount} tasks left`;
     }
 
     toggleAllTodos() {
-        console.log(this.toggleAll.checked)
         const markAs = this.toggleAll.checked;
 
         const newTodos = this.todos.map( (todo) => {
@@ -397,7 +374,6 @@ class TodoList {
         this.todos = this.todos.filter( td => td.id !== todo.id)
     }
 
-    //TOGGLE ALL FIX
     filterTodoList(){
          if(this.currentFilter === "all") {
 
@@ -425,7 +401,6 @@ class TodoList {
     render(){
         this.root.innerHTML = ""
 
-        console.log("RENDER!")
         
         this.filterTodoList()
 
@@ -436,15 +411,10 @@ class TodoList {
 
         this.updateActiveTodoCount();
         this.updateToggleAllButtonVisibility();
-        // updateToggleAllButtonVisibility();
-        // updateActiveTodoCount(todos);
-
-        // render logic
     }
 
     addTodo(text){
         const newTodo = new TodoItem(undefined,text, false, this)
-        console.log(newTodo)
         this.todos = [...this.todos,newTodo]
     }
 
@@ -460,33 +430,4 @@ class TodoList {
 const root = document.getElementById("root")
 const app = new App(root)
 app.init()
-
-
-
-
-
-// const todoInput = document.getElementById("inputTodo")
-// const todoForm = document.getElementById("todoForm")
-
-// todoForm.addEventListener("submit", (e) => {
-//     e.preventDefault()
-//     app.todoList.addTodo(todoInput.value.trim())
-//     todoInput.value = ""
-// } )
-
-const filterButtons = document.querySelectorAll(".filter-btn");
-filterButtons.forEach(btn => btn.addEventListener("click", () => {
-    app.todoList.currentFilter = btn.dataset.filter;
-
-    filterButtons.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    app.todoList.render()
-}));
-
-const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
-
-clearCompletedButton.addEventListener("click", () => {
-    app.todoList.todos = app.todoList.todos.filter( (todo) => todo.completed === false)
-})
 
