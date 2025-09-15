@@ -1,91 +1,3 @@
-function createHeader() {
-  const header = document.createElement("header");
-  header.className = "header";
-
-  const h1 = document.createElement("h1");
-  h1.className = "header__main-header";
-  h1.textContent = "todos";
-
-  header.appendChild(h1);
-  return header
-}
-
-function createTodoList(){
-  const todoList = document.createElement("ul");
-  todoList.id = "todoList";
-  todoList.className = "todo-list";
-
-  return todoList
-}
-
-function createTodoListFooter(){
-  const filtersDiv = document.createElement("div");
-  filtersDiv.className = "todoList-filters";
-
-  const activeTodosAmount = document.createElement("p");
-  activeTodosAmount.className = "todolist-filters__active-amount";
-
-  const tabsDiv = document.createElement("div");
-  tabsDiv.className = "todoList-filter__tabs";
-
-  const btnAll = document.createElement("button");
-  btnAll.dataset.filter = "all";
-  btnAll.className = "filter-btn active";
-  btnAll.textContent = "All";
-
-  const btnActive = document.createElement("button");
-  btnActive.dataset.filter = "active";
-  btnActive.className = "filter-btn";
-  btnActive.textContent = "Active";
-
-  const btnCompleted = document.createElement("button");
-  btnCompleted.dataset.filter = "completed";
-  btnCompleted.className = "filter-btn";
-  btnCompleted.textContent = "Completed";
-
-  tabsDiv.append(btnAll, btnActive, btnCompleted);
-
-  const clearBtn = document.createElement("button");
-  clearBtn.className = "todoList-filter__clear-completed";
-  clearBtn.textContent = "Clear completed";
-
-  filtersDiv.append(activeTodosAmount, tabsDiv, clearBtn);
-
-  return filtersDiv
-}
-
-function createMain(form){
-  const main = document.createElement("main");
-  main.className = "main";
-
-  const todoList = createTodoList()
-  const todoListFooter = createTodoListFooter()
-
-  main.append(form, todoList, todoListFooter);
-
-
-  return main
-}
-
-function createFooter(){
-  const footer = document.createElement("footer");
-  footer.className = "footer";
-  footer.textContent = "Simple footer";
-
-  return footer
-}
-
-
-// RENDER INITIAL LAYOUT
-
-function renderInitialLayout(root, form) {
-
-  const header = createHeader()
-  const main = createMain(form)
-  const footer = createFooter()
-  root.append(header, main, footer);
-}
-
 
 // LOCAL STORAGE LOGIC
 
@@ -135,64 +47,6 @@ class Form {
 }
 
 
-class App {
-    constructor(root){
-        this.todoList = new TodoList()
-        this.todoList._todos = TodoService.getTodos(this.todoList)
-        this.root = root
-
-        this.todoForm = new Form()
-        
-
-    }
-
-    handleTodoFormSubmit(e){
-        e.preventDefault()
-        this.todoList.addTodo(this.todoForm.input.value.trim())
-        this.todoForm.input.value = ""
-    }
-
-    handleChangeTodoFilter(btn){
-        this.todoList.currentFilter = btn.dataset.filter;
-
-        filterButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        this.todoList.render()
-    }
-
-    handleClearCompletedTodos(){
-        this.todoList.todos = this.todoList.todos.filter( (todo) => todo.completed === false)
-    }
-
-    init(){
-        renderInitialLayout(this.root, this.todoForm.form)
-        
-        this.todoForm.form.addEventListener("submit", (e) => this.handleTodoFormSubmit(e))
-
-        this.todoList.root = document.getElementById("todoList")
-        this.todoList.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
-
-        this.todoList.toggleAllLabel = document.getElementById("toggleAllLabel")
-        this.todoList.toggleAll = document.getElementById("toggleAll")
-        this.todoList.toggleAll.addEventListener("change", this.todoList.toggleAllTodos.bind(this.todoList))
-
-
-
-        const filterButtons = document.querySelectorAll(".filter-btn");
-        filterButtons.forEach(btn => btn.addEventListener("click", (btn) => this.handleChangeTodoFilter(btn)));
-
-        const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
-
-        clearCompletedButton.addEventListener("click", this.handleClearCompletedTodos)
-
-
-        this.todoList.render()
-    }
-
-
-}
-
 class TodoService {
     static getTodos(todoList) {
         try {
@@ -211,6 +65,8 @@ class TodoService {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
+
+
 }
 
 
@@ -225,7 +81,6 @@ class TodoItem {
     toggle(){
         this.completed = !this.completed
         this.todoList.updateTodo(this)
-        
     }
 
     editText(newText){
@@ -233,7 +88,7 @@ class TodoItem {
             this.todoList.updateTodo(this)
     }
 
-    createTodoItemElement(renderTodoList){    
+    createTodoItemElement(){    
         const li = document.createElement("li");
         li.dataset.id = this.id;
         li.className = "todo-item";
@@ -247,7 +102,7 @@ class TodoItem {
         checkbox.className = "todo-checkbox";
         checkbox.checked = this.completed;
         checkbox.addEventListener("change", () => {
-            this.toggle(renderTodoList)
+            this.toggle()
         });
 
         const checkmark = document.createElement("span");
@@ -343,8 +198,7 @@ class TodoList {
         }
     }
 
-    updateActiveTodoCount() {
-        
+    updateActiveTodoCount() {        
         const activeCount = this.todos.filter(todo => !todo.completed).length;
         this.activeTodoAmount.textContent = activeCount === 1 
             ? `${activeCount} task left` 
@@ -423,6 +277,144 @@ class TodoList {
     }
 
 }
+
+
+
+class App {
+    constructor(root){
+        this.todoList = new TodoList()
+        this.todoList._todos = TodoService.getTodos(this.todoList)
+        this.root = root
+
+        this.todoForm = new Form()
+        
+
+    }
+
+    createHeader() {
+        const header = document.createElement("header");
+        header.className = "header";
+
+        const h1 = document.createElement("h1");
+        h1.className = "header__main-header";
+        h1.textContent = "todos";
+
+        header.appendChild(h1);
+        return header
+    }
+
+    createTodoList(){
+        const todoList = document.createElement("ul");
+        todoList.id = "todoList";
+        todoList.className = "todo-list";
+
+        return todoList
+    }
+
+    createTodoListFooter(){
+        const filtersDiv = document.createElement("div");
+        filtersDiv.className = "todoList-filters";
+
+        const activeTodosAmount = document.createElement("p");
+        activeTodosAmount.className = "todolist-filters__active-amount";
+
+        const tabsDiv = document.createElement("div");
+        tabsDiv.className = "todoList-filter__tabs";
+
+        const btnAll = document.createElement("button");
+        btnAll.dataset.filter = "all";
+        btnAll.className = "filter-btn active";
+        btnAll.textContent = "All";
+
+        const btnActive = document.createElement("button");
+        btnActive.dataset.filter = "active";
+        btnActive.className = "filter-btn";
+        btnActive.textContent = "Active";
+
+        const btnCompleted = document.createElement("button");
+        btnCompleted.dataset.filter = "completed";
+        btnCompleted.className = "filter-btn";
+        btnCompleted.textContent = "Completed";
+
+        tabsDiv.append(btnAll, btnActive, btnCompleted);
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "todoList-filter__clear-completed";
+        clearBtn.textContent = "Clear completed";
+
+        filtersDiv.append(activeTodosAmount, tabsDiv, clearBtn);
+
+        return filtersDiv
+    }
+
+    createMain(form){
+        const main = document.createElement("main");
+        main.className = "main";
+
+        const todoList = this.createTodoList()
+        const todoListFooter = this.createTodoListFooter()
+
+        main.append(form, todoList, todoListFooter);
+
+
+        return main
+    }
+
+    renderInitialLayout(root, form) {
+        const header = this.createHeader()
+        const main = this.createMain(form)
+        root.append(header, main);
+    }
+
+
+
+    handleTodoFormSubmit(e){
+        e.preventDefault()
+        this.todoList.addTodo(this.todoForm.input.value.trim())
+        this.todoForm.input.value = ""
+    }
+
+    handleChangeTodoFilter(filterButtons, btn){
+        this.todoList.currentFilter = btn.dataset.filter;
+
+        filterButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        this.todoList.render()
+    }
+
+    handleClearCompletedTodos(){
+        this.todoList.todos = this.todoList.todos.filter( (todo) => todo.completed === false)
+    }
+
+    init(){
+        this.renderInitialLayout(this.root, this.todoForm.form)
+        
+        this.todoForm.form.addEventListener("submit", (e) => this.handleTodoFormSubmit(e))
+
+        this.todoList.root = document.getElementById("todoList")
+        this.todoList.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
+
+        this.todoList.toggleAllLabel = document.getElementById("toggleAllLabel")
+        this.todoList.toggleAll = document.getElementById("toggleAll")
+        this.todoList.toggleAll.addEventListener("change", this.todoList.toggleAllTodos.bind(this.todoList))
+
+
+
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        filterButtons.forEach(btn => btn.addEventListener("click", () => this.handleChangeTodoFilter(filterButtons, btn)));
+
+        const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
+
+        clearCompletedButton.addEventListener("click", () => this.handleClearCompletedTodos())
+
+
+        this.todoList.render()
+    }
+
+
+}
+
 
 
 // INIT
