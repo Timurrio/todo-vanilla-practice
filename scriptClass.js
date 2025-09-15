@@ -48,146 +48,38 @@ class Form {
 
 
 class TodoService {
-    static getTodos(todoList) {
-        try {
-            const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
-            const todos = data.map((todo) => new TodoItem(todo.id, todo.text, todo.completed, todoList))
-            return todos
-        } catch (e) {
-            console.error("Error reading todos from localStorage", e);
-            return [];
-        }
-    }
-
-
-    static setTodos(todos) {
-        const data = todos.map((todo) => ({id: todo.id, text: todo.text, completed: todo.completed}))
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-
-
-}
-
-
-class TodoItem {
-    constructor(id = Date.now().toString(), text, completed = false, todoList){
-        this.id = id;
-        this.text = text;
-        this.completed = completed;
-        this.todoList = todoList
-    }
-
-    toggle(){
-        this.completed = !this.completed
-        this.todoList.updateTodo(this)
-    }
-
-    editText(newText){
-            this.text = newText
-            this.todoList.updateTodo(this)
-    }
-
-    createTodoItemElement(){    
-        const li = document.createElement("li");
-        li.dataset.id = this.id;
-        li.className = "todo-item";
-        if (this.completed) li.classList.add("completed");
-
-        const label = document.createElement("label");
-        label.className = "todo-checkbox-wrapper";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "todo-checkbox";
-        checkbox.checked = this.completed;
-        checkbox.addEventListener("change", () => {
-            this.toggle()
-        });
-
-        const checkmark = document.createElement("span");
-        checkmark.className = "todo-checkmark";
-
-        label.appendChild(checkbox);
-        label.appendChild(checkmark);
-
-        const todoText = document.createElement("span");
-        todoText.className = "todo-text";
-        todoText.textContent = this.text;
-
-        const btn = document.createElement("button");
-        btn.className = "todo-delete";
-        btn.textContent = "X";
-
-        btn.addEventListener("click", () => {
-            this.todoList.removeTodo(this)
-        });
-
-    
-        todoText.addEventListener("dblclick", () => {
-        const todoEdit = document.createElement("input")
-        todoEdit.type = "text"
-        todoEdit.className = "todo-edit"
-        todoEdit.value = this.text
-
-        btn.style.display = "none"
-        label.style.display = "none"
-
-        li.replaceChild(todoEdit, todoText);
-        todoEdit.focus();
-
-
-        todoEdit.addEventListener("blur", () => {
-
-            btn.style.display = "block"
-            label.style.display = "block"
-            const newText = todoEdit.value.trim()
-            if(newText){
-                this.editText(newText)
-            } else {
-                this.editText(this.text)
-            }
-        })
-        
-        todoEdit.addEventListener("keydown", (e) => {
-
-            if(e.key === "Enter") {
-            todoEdit.blur();
-            }
-
-        })
-        })
-
-        
-        li.appendChild(label);
-        li.appendChild(todoText);
-        li.appendChild(btn);
-
-        return li
-    }
-}
-
-class TodoList {
-    constructor(todos=[]){
-
+    constructor(){
+        const todos = this.getTodos(this)
         this._todos = todos
         this.filteredTodos = todos
         this.currentFilter = "all"
-        this.root = null
+        this.todoListRender = null
         this.activeTodoAmount = null
         this.toggleAll = null 
         this.toggleAllLabel = null
-        
     }
 
     set todos(value){
         this._todos = value
-        TodoService.setTodos(value)
+        this.setTodos(value)
         this.render()
     }
 
     get todos(){
         return this._todos
+    }
+
+    clearCompletedTodos(){
+        this.todos = this.todos.filter( (todo) => todo.completed === false)
+    }
+
+    addTodo(text){
+        const newTodo = new TodoItem(undefined,text, false, this)
+        this.todos = [...this.todos,newTodo]
+    }
+
+    remove(todoId){
+        this.todos = this.todos.filter( (todo) => todo.id !== todoId)
     }
 
     updateToggleAllButtonVisibility() {
@@ -204,6 +96,7 @@ class TodoList {
             ? `${activeCount} task left` 
             : `${activeCount} tasks left`;
     }
+
 
     toggleAllTodos() {
         const markAs = this.toggleAll.checked;
@@ -252,29 +145,156 @@ class TodoList {
         }
     }
 
+     getTodos(todoService) {
+        try {
+            const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
+            const todos = data.map((todo) => new TodoItem(todo.id, todo.text, todo.completed, todoService))
+            console.log(todos)
+            return todos
+        } catch (e) {
+            console.error("Error reading todos from localStorage", e);
+            return [];
+        }
+    }
+
+
+     setTodos(todos) {
+        const data = todos.map((todo) => ({id: todo.id, text: todo.text, completed: todo.completed}))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
     render(){
+        this.updateToggleAllButtonVisibility()
+        this.updateActiveTodoCount()
+        this.todoListRender()
+    }
+
+}
+
+
+class TodoItem {
+    constructor(id = Date.now().toString(), text, completed = false, todoService){
+        this.id = id;
+        this.text = text;
+        this.completed = completed;
+        this.todoService = todoService
+    }
+
+    toggle(){
+        this.completed = !this.completed
+        this.todoService.updateTodo(this)
+    }
+
+    editText(newText){
+        this.text = newText
+        this.todoService.updateTodo(this)
+    }
+
+    createTodoItemElement(){    
+        const li = document.createElement("li");
+        li.dataset.id = this.id;
+        li.className = "todo-item";
+        if (this.completed) li.classList.add("completed");
+
+        const label = document.createElement("label");
+        label.className = "todo-checkbox-wrapper";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "todo-checkbox";
+        checkbox.checked = this.completed;
+        checkbox.addEventListener("change", () => {
+            this.toggle()
+        });
+
+        const checkmark = document.createElement("span");
+        checkmark.className = "todo-checkmark";
+
+        label.appendChild(checkbox);
+        label.appendChild(checkmark);
+
+        const todoText = document.createElement("span");
+        todoText.className = "todo-text";
+        todoText.textContent = this.text;
+
+        const btn = document.createElement("button");
+        btn.className = "todo-delete";
+        btn.textContent = "X";
+
+        btn.addEventListener("click", () => {
+            this.todoService.removeTodo(this)
+        });
+
+    
+        todoText.addEventListener("dblclick", () => {
+        const todoEdit = document.createElement("input")
+        todoEdit.type = "text"
+        todoEdit.className = "todo-edit"
+        todoEdit.value = this.text
+
+        btn.style.display = "none"
+        label.style.display = "none"
+
+        li.replaceChild(todoEdit, todoText);
+        todoEdit.focus();
+
+
+        todoEdit.addEventListener("blur", () => {
+
+            btn.style.display = "block"
+            label.style.display = "block"
+            const newText = todoEdit.value.trim()
+            if(newText){
+                this.editText(newText)
+            } else {
+                this.editText(this.text)
+            }
+        })
+        
+        todoEdit.addEventListener("keydown", (e) => {
+
+            if(e.key === "Enter") {
+            todoEdit.blur();
+            }
+
+        })
+        })
+
+        
+        li.appendChild(label);
+        li.appendChild(todoText);
+        li.appendChild(btn);
+
+        return li
+    }
+}
+
+class TodoList {
+    constructor(todoService){
+
+        
+        this.root = null
+        this.TodoService = todoService
+        
+    }
+
+    render(){
+        console.log("RENDER")
         this.root.innerHTML = ""
 
         
-        this.filterTodoList()
+        this.TodoService.filterTodoList()
 
-        const domTodos = this.filteredTodos.map( (todo) => todo.createTodoItemElement(() => this.render()))
+        const domTodos = this.TodoService.filteredTodos.map( (todo) => todo.createTodoItemElement())
         domTodos.forEach( (todo) => {
             this.root.appendChild(todo)
         })
 
-        this.updateActiveTodoCount();
-        this.updateToggleAllButtonVisibility();
+        // this.updateActiveTodoCount();
+        // this.updateToggleAllButtonVisibility();
     }
 
-    addTodo(text){
-        const newTodo = new TodoItem(undefined,text, false, this)
-        this.todos = [...this.todos,newTodo]
-    }
 
-    remove(todoId){
-        this.todos = this.todos.filter( (todo) => todo.id !== todoId)
-    }
 
 }
 
@@ -282,13 +302,11 @@ class TodoList {
 
 class App {
     constructor(root){
-        this.todoList = new TodoList()
-        this.todoList._todos = TodoService.getTodos(this.todoList)
+        this.todoService = new TodoService()
+        this.todoList = new TodoList(this.todoService)
+        this.todoService.todoListRender = this.todoList.render.bind(this.todoList)
         this.root = root
-
         this.todoForm = new Form()
-        
-
     }
 
     createHeader() {
@@ -370,12 +388,12 @@ class App {
 
     handleTodoFormSubmit(e){
         e.preventDefault()
-        this.todoList.addTodo(this.todoForm.input.value.trim())
+        this.todoService.addTodo(this.todoForm.input.value.trim())
         this.todoForm.input.value = ""
     }
 
     handleChangeTodoFilter(filterButtons, btn){
-        this.todoList.currentFilter = btn.dataset.filter;
+        this.todoService.currentFilter = btn.dataset.filter;
 
         filterButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
@@ -383,9 +401,6 @@ class App {
         this.todoList.render()
     }
 
-    handleClearCompletedTodos(){
-        this.todoList.todos = this.todoList.todos.filter( (todo) => todo.completed === false)
-    }
 
     init(){
         this.renderInitialLayout(this.root, this.todoForm.form)
@@ -393,11 +408,13 @@ class App {
         this.todoForm.form.addEventListener("submit", (e) => this.handleTodoFormSubmit(e))
 
         this.todoList.root = document.getElementById("todoList")
-        this.todoList.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
 
-        this.todoList.toggleAllLabel = document.getElementById("toggleAllLabel")
-        this.todoList.toggleAll = document.getElementById("toggleAll")
-        this.todoList.toggleAll.addEventListener("change", this.todoList.toggleAllTodos.bind(this.todoList))
+
+        this.todoService.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
+
+        this.todoService.toggleAllLabel = document.getElementById("toggleAllLabel")
+        this.todoService.toggleAll = document.getElementById("toggleAll")
+        this.todoService.toggleAll.addEventListener("change", this.todoService.toggleAllTodos.bind(this.todoService))
 
 
 
@@ -406,10 +423,10 @@ class App {
 
         const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
 
-        clearCompletedButton.addEventListener("click", () => this.handleClearCompletedTodos())
+        clearCompletedButton.addEventListener("click", () => this.todoService.clearCompletedTodos())
 
 
-        this.todoList.render()
+        this.todoService.render()
     }
 
 
