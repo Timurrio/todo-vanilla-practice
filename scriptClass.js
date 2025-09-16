@@ -1,10 +1,6 @@
-
 // LOCAL STORAGE LOGIC
 
 const STORAGE_KEY = "todos"
-
-
-
 
 // CLASSES
 
@@ -122,26 +118,29 @@ class TodoService {
     }
 
     filterTodoList(){
-         if(this.currentFilter === "all") {
 
-            this.filteredTodos = this.todos
+        switch(this.currentFilter){
+            case "all":
+                this.filteredTodos = this.todos
 
-            if(this.filteredTodos.some( (todo) => todo.completed === false))
+                if(this.filteredTodos.some( (todo) => todo.completed === false))
                 {
-                 this.toggleAll.checked = false
+                     this.toggleAll.checked = false
                 } else {
-                 this.toggleAll.checked = true
+                    this.toggleAll.checked = true
                 }
-
-        } else if (this.currentFilter === "active") {
-            this.filteredTodos = this.todos.filter(todo => !todo.completed);
-            this.toggleAll.checked = false
-        } else if (this.currentFilter === "completed") {
-            this.filteredTodos = this.todos.filter(todo => todo.completed);
-            this.toggleAll.checked = true
-
-        } else {
-            this.filteredTodos = []
+                break;
+            case "active":
+                this.filteredTodos = this.todos.filter(todo => !todo.completed);
+                this.toggleAll.checked = false
+                break;
+            case "completed":
+                this.filteredTodos = this.todos.filter(todo => todo.completed);
+                this.toggleAll.checked = true
+                break;
+            default: 
+                this.filteredTodos = []
+                break;
         }
     }
 
@@ -290,8 +289,6 @@ class TodoList {
             this.root.appendChild(todo)
         })
 
-        // this.updateActiveTodoCount();
-        // this.updateToggleAllButtonVisibility();
     }
 
 
@@ -431,8 +428,6 @@ class App {
 
 
 }
-
-
 
 // INIT
 
