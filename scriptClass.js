@@ -76,6 +76,7 @@ class TodoService extends EventEmitter {
         this.activeTodoAmount = null
         this.toggleAll = null 
         this.toggleAllLabel = null
+        this.todoFooter = null
 
         this.on("todos:changeFilter", this.render.bind(this))
         this.on("LocalStorageChange", this.render.bind(this))
@@ -173,6 +174,14 @@ class TodoService extends EventEmitter {
         this.updateToggleAllButtonVisibility()
     }
 
+    updateTodoFooterVisibility(){
+        if(this.todos.length < 1){
+             this.todoFooter.style.display = "none"
+        } else {
+            this.todoFooter.style.display = "flex"
+        }
+    }
+
      getTodos(todoService) {
         try {
             const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
@@ -192,6 +201,7 @@ class TodoService extends EventEmitter {
     }
 
     render(){
+        this.updateTodoFooterVisibility()
         this.updateActiveTodoCount()
         this.todoListRender()
     }
@@ -246,9 +256,7 @@ class TodoItem {
         btn.className = "todo-delete";
         btn.textContent = "X";
 
-        btn.addEventListener("click", () => {
-            this.todoService.removeTodo(this)
-        });
+        btn.addEventListener("click", () => this.todoService.removeTodo(this));
 
     
         todoText.addEventListener("dblclick", () => {
@@ -278,8 +286,8 @@ class TodoItem {
         
         todoEdit.addEventListener("keydown", (e) => {
 
-            if(e.key === "Enter") {
-            todoEdit.blur();
+            if(e.key === "Enter" || e.key === "Escape") {
+                todoEdit.blur();
             }
 
         })
@@ -435,8 +443,10 @@ class App {
         this.todoService.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
         this.todoService.toggleAllLabel = document.getElementById("toggleAllLabel")
         this.todoService.toggleAll = document.getElementById("toggleAll")
+        this.todoService.todoFooter = document.querySelector(".todoList-filters")
         const filterButtons = document.querySelectorAll(".filter-btn");
         const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
+
 
 
         this.todoService.toggleAll.addEventListener("change", this.todoService.toggleAllTodos.bind(this.todoService))
@@ -444,7 +454,6 @@ class App {
         filterButtons.forEach(btn => btn.addEventListener("click", () => this.handleChangeTodoFilter(filterButtons, btn)));
 
         clearCompletedButton.addEventListener("click", () => this.todoService.emit("todos:clearCompleted") )
-        // clearCompletedTodos.bind(this.todoService)
 
         this.todoService.render()
     }
