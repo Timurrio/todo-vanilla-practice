@@ -4,6 +4,29 @@ const STORAGE_KEY = "todos"
 
 // CLASSES
 
+class EventEmitter {
+  constructor() {
+    this.events = {};
+  }
+
+  on(event, listener) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+  }
+
+  off(event, listener) {
+    if (!this.events[event]) return;
+    this.events[event] = this.events[event].filter(l => l !== listener);
+  }
+
+  emit(event, ...args) {
+    if (!this.events[event]) return;
+    console.log(event)
+    this.events[event].forEach(listener => listener(...args));
+  }
+}
+
+
 class Form {
     constructor(){
         const formElements = this.createFormElements()
@@ -43,8 +66,9 @@ class Form {
 }
 
 
-class TodoService {
+class TodoService extends EventEmitter {
     constructor(){
+        super()
         const todos = this.getTodos(this)
         this._todos = todos
         this.filteredTodos = todos
@@ -53,12 +77,15 @@ class TodoService {
         this.activeTodoAmount = null
         this.toggleAll = null 
         this.toggleAllLabel = null
+
+        this.on("todos:change", this.render.bind(this))
+        this.on("todos:clearCompleted", this.clearCompletedTodos.bind(this))
     }
 
     set todos(value){
         this._todos = value
         this.setTodos(value)
-        this.render()
+        this.emit("todos:change")
     }
 
     get todos(){
@@ -390,33 +417,32 @@ class App {
         filterButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        this.todoList.render()
+        this.todoList.emit("todos:change")
     }
 
 
     init(){
         this.renderInitialLayout(this.root, this.todoForm.form)
+
+        
         
         this.todoForm.form.addEventListener("submit", this.handleTodoFormSubmit.bind(this))
 
+
         this.todoList.root = document.getElementById("todoList")
-
-
         this.todoService.activeTodoAmount = document.querySelector(".todolist-filters__active-amount")
-
         this.todoService.toggleAllLabel = document.getElementById("toggleAllLabel")
         this.todoService.toggleAll = document.getElementById("toggleAll")
-        this.todoService.toggleAll.addEventListener("change", this.todoService.toggleAllTodos.bind(this.todoService))
-
-
-
         const filterButtons = document.querySelectorAll(".filter-btn");
-        filterButtons.forEach(btn => btn.addEventListener("click", () => this.handleChangeTodoFilter(filterButtons, btn)));
-
         const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
 
-        clearCompletedButton.addEventListener("click", this.todoService.clearCompletedTodos.bind(this.todoService))
 
+        this.todoService.toggleAll.addEventListener("change", this.todoService.toggleAllTodos.bind(this.todoService))
+
+        filterButtons.forEach(btn => btn.addEventListener("click", () => this.handleChangeTodoFilter(filterButtons, btn)));
+
+        clearCompletedButton.addEventListener("click", () => this.todoService.emit("todos:clearCompleted") )
+        // clearCompletedTodos.bind(this.todoService)
 
         this.todoService.render()
     }
