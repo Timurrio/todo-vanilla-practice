@@ -21,7 +21,6 @@ class EventEmitter {
 
   emit(event, ...args) {
     if (!this.events[event]) return;
-    console.log(event)
     this.events[event].forEach(listener => listener(...args));
   }
 }
@@ -78,14 +77,15 @@ class TodoService extends EventEmitter {
         this.toggleAll = null 
         this.toggleAllLabel = null
 
-        this.on("todos:change", this.render.bind(this))
+        this.on("todos:changeFilter", this.render.bind(this))
+        this.on("LocalStorageChange", this.render.bind(this))
         this.on("todos:clearCompleted", this.clearCompletedTodos.bind(this))
     }
 
     set todos(value){
         this._todos = value
         this.setTodos(value)
-        this.emit("todos:change")
+        
     }
 
     get todos(){
@@ -169,6 +169,8 @@ class TodoService extends EventEmitter {
                 this.filteredTodos = []
                 break;
         }
+
+        this.updateToggleAllButtonVisibility()
     }
 
      getTodos(todoService) {
@@ -186,10 +188,10 @@ class TodoService extends EventEmitter {
      setTodos(todos) {
         const data = todos.map((todo) => ({id: todo.id, text: todo.text, completed: todo.completed}))
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        this.emit("LocalStorageChange")
     }
 
     render(){
-        this.updateToggleAllButtonVisibility()
         this.updateActiveTodoCount()
         this.todoListRender()
     }
@@ -417,7 +419,7 @@ class App {
         filterButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
 
-        this.todoList.emit("todos:change")
+        this.todoService.emit("todos:changeFilter")
     }
 
 
