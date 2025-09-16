@@ -148,7 +148,6 @@ class TodoService {
         try {
             const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
             const todos = data.map((todo) => new TodoItem(todo.id, todo.text, todo.completed, todoService))
-            console.log(todos)
             return todos
         } catch (e) {
             console.error("Error reading todos from localStorage", e);
@@ -202,9 +201,7 @@ class TodoItem {
         checkbox.type = "checkbox";
         checkbox.className = "todo-checkbox";
         checkbox.checked = this.completed;
-        checkbox.addEventListener("change", () => {
-            this.toggle()
-        });
+        checkbox.addEventListener("change", this.toggle.bind(this));
 
         const checkmark = document.createElement("span");
         checkmark.className = "todo-checkmark";
@@ -278,9 +275,7 @@ class TodoList {
     }
 
     render(){
-        console.log("RENDER")
         this.root.innerHTML = ""
-
         
         this.TodoService.filterTodoList()
 
@@ -402,7 +397,7 @@ class App {
     init(){
         this.renderInitialLayout(this.root, this.todoForm.form)
         
-        this.todoForm.form.addEventListener("submit", (e) => this.handleTodoFormSubmit(e))
+        this.todoForm.form.addEventListener("submit", this.handleTodoFormSubmit.bind(this))
 
         this.todoList.root = document.getElementById("todoList")
 
@@ -420,7 +415,7 @@ class App {
 
         const clearCompletedButton = document.querySelector(".todoList-filter__clear-completed")
 
-        clearCompletedButton.addEventListener("click", () => this.todoService.clearCompletedTodos())
+        clearCompletedButton.addEventListener("click", this.todoService.clearCompletedTodos.bind(this.todoService))
 
 
         this.todoService.render()
